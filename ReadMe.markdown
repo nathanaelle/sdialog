@@ -9,7 +9,8 @@
  ✓ | ✓ | [stderr log](https://www.freedesktop.org/software/systemd/man/sd-daemon.html)
  ✓ | ✓ | [sd_notify](https://www.freedesktop.org/software/systemd/man/systemd-notify.html)
  ✓ | ✓ | [watchdog](https://www.freedesktop.org/software/systemd/man/sd_watchdog_enabled.html)
- ✓ | ✓ | [socket activation](https://www.freedesktop.org/software/systemd/man/sd_listen_fds.html)
+ ✓ | ✓ | accept [socket activation](https://www.freedesktop.org/software/systemd/man/sd_listen_fds.html)
+ ? | ✗ | notify [socket activation](https://www.freedesktop.org/software/systemd/man/sd_listen_fds.html)
  ✗ | ✗ | [sd-bus](https://www.freedesktop.org/software/systemd/man/sd-bus.html)
 
 ## License
