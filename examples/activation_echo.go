@@ -4,8 +4,7 @@ import	(
 	"net"
 	"fmt"
 	"io"
-//	sd	"github.com/nathanaelle/sdialog"
-	sd	"../../sdialog"
+	sd	"github.com/nathanaelle/sdialog"
 )
 
 func main(){
