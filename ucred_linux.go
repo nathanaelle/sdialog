@@ -8,11 +8,11 @@ import	(
 
 
 type	(
-	Ucred	syscall.Ucred
+	uCred	syscall.Ucred
 )
 
 
-func UnixCredentials(ucred *Ucred) []byte {
+func unixCredentials(ucred *uCred) []byte {
 	sucred	:= syscall.Ucred(*ucred)
 	return	syscall.UnixCredentials( &sucred )
 }

@@ -20,7 +20,7 @@ func Notify(states ...State) (err error) {
 		return	NoSDialogAvailable
 	}
 
-	oob = append(oob, UnixCredentials(&Ucred{
+	oob = append(oob, unixCredentials(&uCred{
 		Pid:	int32(os.Getpid()),
 		Uid:	uint32(os.Getuid()),
 		Gid:	uint32(os.Getgid()),

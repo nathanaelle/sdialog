@@ -5,7 +5,7 @@ package sdialog // import "github.com/nathanaelle/sdialog"
 
 
 type	(
-	Ucred struct {
+	uCred struct {
 		Pid int32
 		Uid uint32
 		Gid uint32
@@ -13,7 +13,7 @@ type	(
 )
 
 
-func UnixCredentials(ucred *Ucred) []byte {
+func unixCredentials(ucred *uCred) []byte {
 	SD_WARNING.Log("not implemented in golang")
 	return []byte{}
 }
