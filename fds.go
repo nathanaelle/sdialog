@@ -68,7 +68,7 @@ func valid_fdname(name string) bool {
 
 func FDStore(name string, ifaces ...FileFD) State {
 	if !valid_fdname(name) {
-		SD_ALERT.Logf( "%v", &InvalidFDNameError { name } )
+		SD_ALERT.Logf( "%v", &invalidFDNameError { name } )
 		return	nil
 	}
 

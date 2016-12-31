@@ -36,7 +36,7 @@ func Notify(states ...State) (err error) {
 
 	for _,state := range states {
 		if !valid_state(state) {
-			SD_ALERT.Error(&InvalidStateError{ state })
+			SD_ALERT.Error(&invalidStateError{ state })
 			continue
 		}
 		m,o	:= state.State()

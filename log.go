@@ -73,7 +73,7 @@ func (l LogLevel)Log(message string) error {
 	}
 
 	if l < SD_EMERG || l > SD_DEBUG {
-		err := &OutOfBoundsLogLevelError { l, message }
+		err := &outOfBoundsLogLevelError { l, message }
 		stderr(SD_ALERT, err.Error())
 		return	err
 	}
@@ -89,7 +89,7 @@ func (l LogLevel)Error(message error) error {
 	}
 
 	if l < SD_EMERG || l > SD_DEBUG {
-		err := &OutOfBoundsLogLevelError { l, message.Error() }
+		err := &outOfBoundsLogLevelError { l, message.Error() }
 		stderr(SD_ALERT, err.Error())
 		return	err
 	}

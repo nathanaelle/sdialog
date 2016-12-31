@@ -6,16 +6,16 @@ import	(
 )
 
 type	(
-	OutOfBoundsLogLevelError	struct {
+	outOfBoundsLogLevelError	struct {
 		Level		LogLevel
 		Message		string
 	}
 
-	InvalidFDNameError 		struct {
+	invalidFDNameError 		struct {
 		Name		string
 	}
 
-	InvalidStateError		struct {
+	invalidStateError		struct {
 		State		State
 	}
 )
@@ -26,16 +26,16 @@ var(
 )
 
 
-func (oob *OutOfBoundsLogLevelError)Error() string {
+func (oob *outOfBoundsLogLevelError)Error() string {
 	return	fmt.Sprintf("invalid LogLevel 0x%02x for message %s\n", oob.Level, oob.Message)
 }
 
 
-func (ifdn *InvalidFDNameError)Error() string {
+func (ifdn *invalidFDNameError)Error() string {
 	return	fmt.Sprintf("invalid name [%s]\n", ifdn.Name)
 }
 
 
-func (isn *InvalidStateError)Error() string {
-	return	fmt.Sprintf("state [%v] is invalide\n", isn.State)
+func (isn *invalidStateError)Error() string {
+	return	fmt.Sprintf("invalid state [%v]\n", isn.State)
 }
