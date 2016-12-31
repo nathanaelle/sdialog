@@ -3,7 +3,6 @@ package sdialog // import "github.com/nathanaelle/sdialog"
 import	(
 	"os"
 	"fmt"
-	"net"
 	"strings"
 	"syscall"
 )
@@ -12,7 +11,6 @@ type	(
 	FileFD	interface {
 		File() (*os.File,error)
 		Close() error
-		Addr() net.Addr
 	}
 
 	fds	struct {
@@ -76,10 +74,10 @@ func FDStore(name string, ifaces ...FileFD) State {
 		name: name,
 	}
 
-	for _,listener := range ifaces {
+	for id,listener := range ifaces {
 		fd,err := listener.File()
 		if  err != nil {
-			SD_ALERT.Logf("%v : %v", listener.Addr, err)
+			SD_ALERT.Logf("socket %v : %v", id, err)
 			continue
 		}
 		s.fds = append(s.fds, int(fd.Fd()))
@@ -94,7 +92,7 @@ func FDRetrieve(mapper MapFD) (ret []FileFD) {
 		return
 	}
 
-	if os.Getpid() != l_pid {
+	if !is_mainpid() {
 		SD_ALERT.Logf("LISTEN_PID : expected %d got %d", os.Getpid(), l_pid)
 		return
 	}

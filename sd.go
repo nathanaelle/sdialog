@@ -60,3 +60,7 @@ func init() {
 		n_fds	+= sd_fds_start
 	}
 }
+
+func is_mainpid() bool {
+	return	(l_pid==0) || (os.Getpid() != l_pid)
+}
