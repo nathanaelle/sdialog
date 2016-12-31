@@ -1,6 +1,6 @@
 // +build linux
 
-package sdialog // import "github.com/nathanaelle/shesha/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog"
 
 import (
 	"bytes"

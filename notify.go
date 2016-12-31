@@ -1,4 +1,4 @@
-package sdialog // import "github.com/nathanaelle/shesha/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog"
 
 import	(
 	"os"
@@ -7,7 +7,7 @@ import	(
 
 
 var	(
-	notifyConn		net.UnixConn
+	notifyConn		*net.UnixConn
 	notify_socket		string
 	notify_local_socket	string
 )
@@ -26,12 +26,13 @@ func Notify(states ...State) (err error) {
 		Gid:	uint32(os.Getgid()),
 	})...)
 
-	notifyConn, err := net.DialUnix("unixgram", &net.UnixAddr{ Name: notify_local_socket, Net: "unixgram" }, nil)
-	if err != nil {
-		SD_ALERT.Logf("NOTIFY_SOCKET Error: %s", err.Error())
-		return
+	if notifyConn == nil {
+		notifyConn, err = net.DialUnix("unixgram", &net.UnixAddr{ Name: notify_local_socket, Net: "unixgram" }, nil)
+		if err != nil {
+			SD_ALERT.Logf("NOTIFY_SOCKET Error: %s", err.Error())
+			return
+		}
 	}
-	defer	notifyConn.Close()
 
 	for _,state := range states {
 		if !valid_state(state) {
