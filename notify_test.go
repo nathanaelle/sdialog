@@ -25,9 +25,12 @@ func Test_Notify_NoUcred(t *testing.T) {
 	t.Logf("run loop\n")
 	go func() {
 		for _, s := range test_sequence {
-			err := Notify(s)
-			if err != nil {
-				panic(err)
+			switch	err := Notify(s); err {
+			case	nil:
+			case	NoSDialogAvailable:
+				t.Error("Env Test isn't detected !!")
+			default:
+				t.Errorf("Notify loop got : %v", err)
 			}
 		}
 	}()

@@ -15,7 +15,7 @@ type	(
 		Addr() net.Addr
 	}
 
-	FDs	struct {
+	fds	struct {
 		name	string
 		fds	[]int
 	}
@@ -29,12 +29,12 @@ var (
 const	sd_fds_start	int	= 3
 
 
-func (sd *FDs)String() string {
+func (sd *fds)String() string {
 	return fmt.Sprintf("[%s] = %d fds", sd.name, len(sd.fds))
 }
 
 
-func (sd *FDs)State() (msg,oob []byte) {
+func (sd *fds)State() (msg,oob []byte) {
 	oob	= syscall.UnixRights(sd.fds...)
 	msg	= []byte("FDSTORE=1\n")
 
@@ -72,7 +72,7 @@ func FDStore(name string, ifaces ...FileFD) State {
 		return	nil
 	}
 
-	s := &FDs {
+	s := &fds {
 		name: name,
 	}
 
