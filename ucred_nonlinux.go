@@ -14,6 +14,6 @@ type	(
 
 
 func unixCredentials(ucred *uCred) []byte {
-	SD_WARNING.Log("not implemented in golang")
+	SD_WARNING.Log("unixCredentials() syscall not implemented in golang")
 	return []byte{}
 }

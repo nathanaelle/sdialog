@@ -4,6 +4,7 @@ import	(
 	"fmt"
 	"os"
 	"log"
+	"io"
 )
 
 
@@ -23,7 +24,7 @@ const	(
 	SD_DEBUG				// debug-level messages
 )
 
-var	logdest	*os.File = os.Stderr
+var	logdest	io.Writer = os.Stderr
 
 func stderr(l LogLevel, m string) {
 	logWriter(l).Write([]byte(m))

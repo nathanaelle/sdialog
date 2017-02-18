@@ -62,6 +62,22 @@ func Test_Notify_NoUcred(t *testing.T) {
 	}
 }
 
+func Test_Notify_NoUcred_NoSD(t *testing.T) {
+	test_sequence := []State{Ready(), Reloading(), Stopping(), Status("hello"), MainPid(1337)}
+	init_testing_env_nosd()
+
+	for _, s := range test_sequence {
+		switch	err := Notify(s); err {
+		case	NoSDialogAvailable:
+		case	nil:
+			t.Error("Env Test NoSD isn't detected !!")
+		default:
+			t.Errorf("Notify loop got : %v", err)
+		}
+	}
+}
+
+
 func create_socket() (*net.UnixConn, error) {
 	return net.DialUnix("unixgram", &net.UnixAddr{Name: notify_socket, Net: "unixgram"}, nil)
 }

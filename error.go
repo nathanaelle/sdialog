@@ -27,12 +27,12 @@ var(
 
 
 func (oob *outOfBoundsLogLevelError)Error() string {
-	return	fmt.Sprintf("invalid LogLevel 0x%02x for message %s\n", oob.Level, oob.Message)
+	return	fmt.Sprintf("invalid LogLevel 0x%02x for message %s", oob.Level, oob.Message)
 }
 
 
 func (ifdn *invalidFDNameError)Error() string {
-	return	fmt.Sprintf("invalid name [%s]\n", ifdn.Name)
+	return	fmt.Sprintf("invalid name [%s]", ifdn.Name)
 }
 
 
