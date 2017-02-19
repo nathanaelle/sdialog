@@ -7,7 +7,6 @@ import	(
 	"io"
 )
 
-
 type	(
 	LogLevel	byte
 	logWriter	LogLevel

@@ -31,40 +31,42 @@ func Watchdog(end <-chan struct{}, wg *sync.WaitGroup)	error {
 	watchdog_running = true
 
 	if end == nil {
-		go func(){
-			defer	func(){ watchdog_running=false }()
-			if wg != nil {
-				wg.Add(1)
-				defer wg.Done()
-			}
-
-			for {
-				select {
-				case	<-ticker:
-					Notify(watchdog_state)
-				}
-			}
-		}()
-
+		go watchdog_without_end(ticker, wg)
 		return	nil
 	}
 
-	go func(){
-		defer	func(){ watchdog_running=false }()
-		if wg != nil {
-			wg.Add(1)
-			defer wg.Done()
-		}
-
-		for {
-			select {
-			case	<-ticker:
-				Notify(watchdog_state)
-			case	<-end:
-				return
-			}
-		}
-	}()
+	go watchdog_with_end(ticker, end, wg)
 
 	return	nil
+}
+
+
+func watchdog_without_end(ticker <-chan time.Time, wg *sync.WaitGroup){
+	defer	func(){ watchdog_running=false }()
+	if wg != nil {
+		wg.Add(1)
+		defer wg.Done()
+	}
+
+	for range ticker {
+		Notify(watchdog_state)
+	}
+}
+
+
+func watchdog_with_end(ticker <-chan time.Time, end <-chan struct{}, wg *sync.WaitGroup){
+	defer	func(){ watchdog_running=false }()
+	if wg != nil {
+		wg.Add(1)
+		defer wg.Done()
+	}
+
+	for {
+		select {
+		case	<-ticker:
+			Notify(watchdog_state)
+		case	<-end:
+			return
+		}
+	}
 }

@@ -1,15 +1,15 @@
 package sdialog // import "github.com/nathanaelle/sdialog"
 
-func ExampleSdialogLog() {
+func ExampleLog() {
 	init_testing_env_out()
 
 	lvl := []LogLevel{SD_EMERG, SD_ALERT, SD_CRIT, SD_ERR, SD_WARNING, SD_NOTICE, SD_INFO, SD_DEBUG}
 
-	for i, sd_level := range lvl {
-		Log(sd_level, "hello")
-		sd_level.Log("world")
-		Logf(sd_level, "foo %d", i+20)
-		sd_level.Logf("bar %d quux", i+30)
+	for i, sdLevel := range lvl {
+		Log(sdLevel, "hello")
+		sdLevel.Log("world")
+		Logf(sdLevel, "foo %d", i+20)
+		sdLevel.Logf("bar %d quux", i+30)
 	}
 	// Output:
 	// <0>hello
