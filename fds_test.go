@@ -17,7 +17,7 @@ func Test_Socket_Activation(t *testing.T)  {
 	out_r, out_w	:= socket_pair(t)
 
 	t.Logf("Prepare command")
-	cmd := exec.Command("go", "run", "./examples/activation_echo.go")
+	cmd := exec.Command("go", "run", "./examples/activation_echo/run.go")
 	cmd.ExtraFiles = []*os.File{
 		in_r,
 		out_w,

@@ -1,3 +1,5 @@
+// +build none
+
 package	main
 
 import	(
@@ -6,6 +8,9 @@ import	(
 	"io"
 	sd	"github.com/nathanaelle/sdialog"
 )
+
+// no code here
+// just stubb from activation_echo
 
 func main(){
 	if err := sd.SD_INFO.Log("ok"); err != nil {
