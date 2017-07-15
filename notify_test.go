@@ -79,5 +79,10 @@ func Test_Notify_NoUcred_NoSD(t *testing.T) {
 
 
 func create_socket() (*net.UnixConn, error) {
+	notify_socket := ""
+	sdc_read(func(sdc sd_conf) error {
+		notify_socket = sdc.notify_socket
+		return	nil
+	})
 	return net.DialUnix("unixgram", &net.UnixAddr{Name: notify_socket, Net: "unixgram"}, nil)
 }

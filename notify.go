@@ -5,18 +5,12 @@ import	(
 	"net"
 )
 
-
-var	(
-	notifyConn		*net.UnixConn
-	notify_socket		string
-	notify_local_socket	string
-)
-
-
 func Notify(states ...State) (err error) {
-	var	msg,oob	[]byte
+	var	msg,oob		[]byte
+	var	notifyConn	*net.UnixConn
+	var	notify_socket	string
 
-	if no_sd_available {
+	if no_sd_available() {
 		return	NoSDialogAvailable
 	}
 
@@ -26,17 +20,24 @@ func Notify(states ...State) (err error) {
 		Gid:	uint32(os.Getgid()),
 	})...)
 
-	if notifyConn == nil {
-		notifyConn, err = net.DialUnix("unixgram", &net.UnixAddr{ Name: notify_local_socket, Net: "unixgram" }, nil)
-		if err != nil {
-			SD_ALERT.Logf("NOTIFY_SOCKET Error: %s", err.Error())
-			return
+
+	sdc_write(func(sdc *sd_conf) error {
+		if sdc.notifyConn == nil {
+			sdc.notifyConn, err = net.DialUnix("unixgram", &net.UnixAddr{ Name: sdc.notify_local_socket, Net: "unixgram" }, nil)
+			if err != nil {
+				SD_CRIT.Logf("NOTIFY_SOCKET Error: %s", err.Error())
+				return NotifyConnectError
+			}
 		}
-	}
+		notifyConn	= sdc.notifyConn
+		notify_socket	= sdc.notify_socket
+
+		return	nil
+	})
 
 	for _,state := range states {
 		if !valid_state(state) {
-			SD_ALERT.Error(&invalidStateError{ state })
+			SD_CRIT.LogError(&invalidStateError{ state })
 			continue
 		}
 		m,o	:= state.State()

@@ -19,11 +19,6 @@ type	(
 	}
 )
 
-var (
-	l_pid	int
-	n_fds	int
-)
-
 const	sd_fds_start	int	= 3
 
 
@@ -66,7 +61,7 @@ func valid_fdname(name string) bool {
 
 func FDStore(name string, ifaces ...FileFD) State {
 	if !valid_fdname(name) {
-		SD_ALERT.Logf( "%v", &invalidFDNameError { name } )
+		SD_CRIT.Logf( "%v", &invalidFDNameError { name } )
 		return	nil
 	}
 
@@ -77,7 +72,7 @@ func FDStore(name string, ifaces ...FileFD) State {
 	for id,listener := range ifaces {
 		fd,err := listener.File()
 		if  err != nil {
-			SD_ALERT.Logf("socket %v : %v", id, err)
+			SD_CRIT.Logf("socket %v : %v", id, err)
 			continue
 		}
 		s.fds = append(s.fds, int(fd.Fd()))
@@ -88,14 +83,19 @@ func FDStore(name string, ifaces ...FileFD) State {
 
 
 func FDRetrieve(mapper MapFD) (ret []FileFD) {
-	if no_sd_available {
+	if no_sd_available() {
 		return
 	}
 
 	if !is_mainpid() {
-		SD_ALERT.Logf("LISTEN_PID : expected %d got %d", os.Getpid(), l_pid)
 		return
 	}
+
+	n_fds := 0
+	sdc_read(func(sdc sd_conf) error {
+		n_fds = sdc.n_fds
+		return	nil
+	})
 
 	if n_fds <= sd_fds_start {
 		return

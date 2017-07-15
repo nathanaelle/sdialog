@@ -2,14 +2,13 @@ package sdialog // import "github.com/nathanaelle/sdialog"
 
 import	(
 	"fmt"
-	"os"
 	"log"
-	"io"
 )
 
 type	(
 	LogLevel	byte
 	logWriter	LogLevel
+
 )
 
 const	(
@@ -23,8 +22,6 @@ const	(
 	SD_DEBUG				// debug-level messages
 )
 
-var	logdest	io.Writer = os.Stderr
-
 func stderr(l LogLevel, m string) {
 	logWriter(l).Write([]byte(m))
 }
@@ -37,7 +34,10 @@ func (l logWriter)Write(mb []byte) (int,error)  {
 	encoded = append(encoded, mb...)
 	encoded = append(encoded, '\n')
 
-	logdest.Write(encoded)
+	sdc_read(func(sdc sd_conf) error {
+		sdc.logdest.Write(encoded)
+		return	nil
+	})
 
 	return	len(mb),nil
 }
@@ -53,13 +53,13 @@ func	Log(l LogLevel, message string) error {
 	return	l.Log(message)
 }
 
-func	(l LogLevel)Logger(prefix string) *log.Logger {
-	return	log.New(logWriter(l), prefix, 0)
+func	(l LogLevel)Logger(prefix string, flag int) *log.Logger {
+	return	log.New(logWriter(l), prefix, flag)
 }
 
 
 func	(l LogLevel)Logf(format string, v ...interface{}) error {
-	if no_sd_available {
+	if no_sd_available() {
 		return	NoSDialogAvailable
 	}
 
@@ -68,13 +68,13 @@ func	(l LogLevel)Logf(format string, v ...interface{}) error {
 
 
 func (l LogLevel)Log(message string) error {
-	if no_sd_available {
+	if no_sd_available() {
 		return	NoSDialogAvailable
 	}
 
 	if l < SD_EMERG || l > SD_DEBUG {
 		err := &outOfBoundsLogLevelError { l, message }
-		stderr(SD_ALERT, err.Error())
+		stderr(SD_CRIT, err.Error())
 		return	err
 	}
 
@@ -83,14 +83,14 @@ func (l LogLevel)Log(message string) error {
 }
 
 
-func (l LogLevel)Error(message error) error {
-	if no_sd_available {
+func (l LogLevel)LogError(message error) error {
+	if no_sd_available() {
 		return	NoSDialogAvailable
 	}
 
 	if l < SD_EMERG || l > SD_DEBUG {
 		err := &outOfBoundsLogLevelError { l, message.Error() }
-		stderr(SD_ALERT, err.Error())
+		stderr(SD_CRIT, err.Error())
 		return	err
 	}
 

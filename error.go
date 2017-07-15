@@ -23,6 +23,7 @@ type	(
 var(
 	NoSDialogAvailable	error	= errors.New("No SDialog Available")
 	NoWatchdogNeeded	error	= errors.New("No Watchdog Needed")
+	NotifyConnectError	error	= errors.New("Can't Connect Notify Socket")
 )
 
 

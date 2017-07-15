@@ -17,7 +17,7 @@ func TestLog(t *testing.T)  {
 		sd_level.Log("world")
 		Logf(sd_level, "foo %d", i+20)
 		sd_level.Logf("bar %d quux", i+30)
-		sd_level.Error(t_err)
+		sd_level.LogError(t_err)
 	}
 
 	inv_lvl := []LogLevel{ LogLevel('a'), LogLevel(0) }
@@ -26,7 +26,7 @@ func TestLog(t *testing.T)  {
 		sd_level.Log("world")
 		Logf(sd_level, "foo %d", i+20)
 		sd_level.Logf("bar %d quux", i+30)
-		sd_level.Error(t_err)
+		sd_level.LogError(t_err)
 	}
 
 
@@ -71,23 +71,26 @@ func TestLog(t *testing.T)  {
 <7>foo 27
 <7>bar 37 quux
 <7>test error
-<1>invalid LogLevel 0x61 for message hello
-<1>invalid LogLevel 0x61 for message world
-<1>invalid LogLevel 0x61 for message foo 20
-<1>invalid LogLevel 0x61 for message bar 30 quux
-<1>invalid LogLevel 0x61 for message test error
-<1>invalid LogLevel 0x00 for message hello
-<1>invalid LogLevel 0x00 for message world
-<1>invalid LogLevel 0x00 for message foo 21
-<1>invalid LogLevel 0x00 for message bar 31 quux
-<1>invalid LogLevel 0x00 for message test error
+<2>invalid LogLevel 0x61 for message hello
+<2>invalid LogLevel 0x61 for message world
+<2>invalid LogLevel 0x61 for message foo 20
+<2>invalid LogLevel 0x61 for message bar 30 quux
+<2>invalid LogLevel 0x61 for message test error
+<2>invalid LogLevel 0x00 for message hello
+<2>invalid LogLevel 0x00 for message world
+<2>invalid LogLevel 0x00 for message foo 21
+<2>invalid LogLevel 0x00 for message bar 31 quux
+<2>invalid LogLevel 0x00 for message test error
 `
 
-	test_out := logdest.(*bytes.Buffer).String()
-	if test_out != expected_out {
-		t.Log(test_out)
-		t.Error("got wrong output")
-	}
+	sdc_read(func(sdc sd_conf) error {
+		test_out := sdc.logdest.(*bytes.Buffer).String()
+		if test_out != expected_out {
+			t.Log(test_out)
+			t.Error("got wrong output")
+		}
+		return	nil
+	})
 }
 
 
@@ -103,14 +106,17 @@ func TestLog_NoSD(t *testing.T)  {
 		sd_level.Log("world")
 		Logf(sd_level, "foo %d", i+20)
 		sd_level.Logf("bar %d quux", i+30)
-		sd_level.Error(t_err)
+		sd_level.LogError(t_err)
 	}
 
 	expected_out := ``
 
-	test_out := logdest.(*bytes.Buffer).String()
-	if test_out != expected_out {
-		t.Log(test_out)
-		t.Error("got wrong output")
-	}
+	sdc_read(func(sdc sd_conf) error {
+		test_out := sdc.logdest.(*bytes.Buffer).String()
+		if test_out != expected_out {
+			t.Log(test_out)
+			t.Error("got wrong output")
+		}
+		return	nil
+	})
 }
