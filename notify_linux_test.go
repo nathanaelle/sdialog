@@ -16,9 +16,14 @@ func Test_Notify_Ucred(t *testing.T) {
 	test_sequence := []State{Ready(), Reloading(), Stopping(), Status("hello"), MainPid(1337)}
 
 	init_testing_env()
+	ns := ""
+	sdc_read(func(sdc sd_conf) error {
+		ns = sdc.notify_socket
+		return	nil
+	})
 
 	t.Logf("create fake server socket\n")
-	srv, err := create_socket_ucred()
+	srv, err := create_socket_ucred(ns)
 	if err != nil {
 		t.Error(err)
 		return
@@ -76,7 +81,7 @@ func Test_Notify_Ucred(t *testing.T) {
 	}
 }
 
-func create_socket_ucred() (*net.UnixConn, error) {
+func create_socket_ucred(notify_socket string) (*net.UnixConn, error) {
 	fd, err := syscall.Socket(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
 	if err != nil {
 		return nil, err
