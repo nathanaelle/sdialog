@@ -5,16 +5,16 @@ package sdialog // import "github.com/nathanaelle/sdialog/v2"
 import (
 	"io"
 	"os"
+	"os/exec"
+	"strconv"
 	"syscall"
 	"testing"
-	"strconv"
-	"os/exec"
 )
 
-func Test_Socket_Activation(t *testing.T)  {
+func Test_Socket_Activation(t *testing.T) {
 	t.Logf("Prepare socket")
-	in_r, in_w	:= socket_pair(t)
-	out_r, out_w	:= socket_pair(t)
+	in_r, in_w := socket_pair(t)
+	out_r, out_w := socket_pair(t)
 
 	t.Logf("Prepare command")
 	cmd := exec.Command("go", "run", "./examples/activation_echo/run.go")
@@ -23,13 +23,13 @@ func Test_Socket_Activation(t *testing.T)  {
 		out_w,
 	}
 
-	stderr,_:= cmd.StderrPipe()
-	env	:= os.Environ()
-	env	= append(env, []string{"LISTEN_FDS=2", "NOTIFY_SOCKET=@test"}...)
+	stderr, _ := cmd.StderrPipe()
+	env := os.Environ()
+	env = append(env, []string{"LISTEN_FDS=2", "NOTIFY_SOCKET=@test"}...)
 	cmd.Env = env
 	t.Logf("run command")
 	err_buf := make([]byte, 65536)
-	go io.ReadFull(stderr,err_buf)
+	go io.ReadFull(stderr, err_buf)
 
 	if err := cmd.Start(); err != nil {
 		t.Logf(string(err_buf))
@@ -57,16 +57,15 @@ func Test_Socket_Activation(t *testing.T)  {
 	}
 }
 
-
 func osfilify(fd int, t *testing.T) *os.File {
 	return os.NewFile(uintptr(fd), "netconnify_"+strconv.Itoa(fd))
 }
 
-func socket_pair(t *testing.T) (*os.File,*os.File) {
+func socket_pair(t *testing.T) (*os.File, *os.File) {
 	fds, err := syscall.Socketpair(syscall.AF_LOCAL, syscall.SOCK_STREAM, 0)
 	if err != nil {
 		t.Fatalf("Socketpair: %v", err)
 	}
 
-	return	osfilify(fds[0], t),osfilify(fds[1], t)
+	return osfilify(fds[0], t), osfilify(fds[1], t)
 }

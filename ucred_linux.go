@@ -2,17 +2,15 @@
 
 package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
-import	(
+import (
 	"syscall"
 )
 
-
-type	(
-	uCred	syscall.Ucred
+type (
+	uCred syscall.Ucred
 )
 
-
 func unixCredentials(ucred *uCred) []byte {
-	sucred	:= syscall.Ucred(*ucred)
-	return	syscall.UnixCredentials( &sucred )
+	sucred := syscall.Ucred(*ucred)
+	return syscall.UnixCredentials(&sucred)
 }

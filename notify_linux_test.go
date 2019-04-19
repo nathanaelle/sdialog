@@ -19,7 +19,7 @@ func Test_Notify_Ucred(t *testing.T) {
 	ns := ""
 	sdc_read(func(sdc sd_conf) error {
 		ns = sdc.notify_socket
-		return	nil
+		return nil
 	})
 
 	t.Logf("create fake server socket\n")
@@ -33,9 +33,9 @@ func Test_Notify_Ucred(t *testing.T) {
 	t.Logf("run loop\n")
 	go func() {
 		for _, s := range test_sequence {
-			switch	err := Notify(s); err {
-			case	nil:
-			case	NoSDialogAvailable:
+			switch err := Notify(s); err {
+			case nil:
+			case NoSDialogAvailable:
 				t.Error("Env Test isn't detected !!")
 			default:
 				t.Errorf("Notify loop got : %v", err)
