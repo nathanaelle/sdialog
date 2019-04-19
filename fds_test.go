@@ -1,6 +1,6 @@
 // +build linux
 
-package sdialog // import "github.com/nathanaelle/sdialog/v2"
+package sdialog // import "github.com/nathanaelle/sdialog"
 
 import (
 	"io"

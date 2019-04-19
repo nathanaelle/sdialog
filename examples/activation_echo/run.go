@@ -7,7 +7,7 @@ import (
 	"io"
 	"net"
 
-	sd "github.com/nathanaelle/sdialog/v2"
+	sd "github.com/nathanaelle/sdialog"
 )
 
 func main() {
