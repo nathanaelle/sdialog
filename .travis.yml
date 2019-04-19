@@ -8,4 +8,4 @@ branches:
   - /poc-.*/
   - experimental
 env:
-  - GO111MODULE=yes
+  - GO111MODULE=on
