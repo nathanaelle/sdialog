@@ -13,17 +13,17 @@ import (
 
 func Test_Notify_Ucred(t *testing.T) {
 	t.Logf("init\n")
-	test_sequence := []State{Ready(), Reloading(), Stopping(), Status("hello"), MainPid(1337)}
+	testSequence := []State{Ready(), Reloading(), Stopping(), Status("hello"), MainPid(1337)}
 
-	init_testing_env()
+	initTestingEnv()
 	ns := ""
-	sdc_read(func(sdc sd_conf) error {
-		ns = sdc.notify_socket
+	sdcRead(func(sdc sdConf) error {
+		ns = sdc.notifySocket
 		return nil
 	})
 
 	t.Logf("create fake server socket\n")
-	srv, err := create_socket_ucred(ns)
+	srv, err := createSocketUcred(ns)
 	if err != nil {
 		t.Error(err)
 		return
@@ -32,10 +32,10 @@ func Test_Notify_Ucred(t *testing.T) {
 
 	t.Logf("run loop\n")
 	go func() {
-		for _, s := range test_sequence {
+		for _, s := range testSequence {
 			switch err := Notify(s); err {
 			case nil:
-			case NoSDialogAvailable:
+			case ErrNoSDialogAvailable:
 				t.Error("Env Test isn't detected !!")
 			default:
 				t.Errorf("Notify loop got : %v", err)
@@ -43,26 +43,26 @@ func Test_Notify_Ucred(t *testing.T) {
 		}
 	}()
 
-	for i, s := range test_sequence {
+	for i, s := range testSequence {
 		t.Logf("wait state %d\n", i)
 		data := make([]byte, 1<<16)
 		oob := make([]byte, 1<<16)
-		s_data, s_oob, _, _, err := srv.ReadMsgUnix(data, oob)
+		dataSize, oobSize, _, _, err := srv.ReadMsgUnix(data, oob)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		data = data[:s_data]
-		oob = oob[:s_oob]
-		exp_data, exp_oob := s.State()
+		data = data[:dataSize]
+		oob = oob[:oobSize]
+		dataExp, oobExp := s.State()
 
-		if !bytes.Equal(data, exp_data) {
-			t.Errorf("data: expected [%v] got [%v]", exp_data, data)
+		if !bytes.Equal(data, dataExp) {
+			t.Errorf("data: expected [%v] got [%v]", dataExp, data)
 			return
 		}
 
-		if len(exp_oob) > s_oob {
-			t.Errorf("oob: expected [%v] got [%v]", len(exp_oob), s_oob)
+		if len(oobExp) > oobSize {
+			t.Errorf("oob: expected [%v] got [%v]", len(oobExp), oobSize)
 			return
 		}
 
@@ -81,14 +81,14 @@ func Test_Notify_Ucred(t *testing.T) {
 	}
 }
 
-func create_socket_ucred(notify_socket string) (*net.UnixConn, error) {
+func createSocketUcred(notifySocket string) (*net.UnixConn, error) {
 	fd, err := syscall.Socket(syscall.AF_UNIX, syscall.SOCK_DGRAM, 0)
 	if err != nil {
 		return nil, err
 	}
 
 	err = syscall.Bind(fd, &syscall.SockaddrUnix{
-		Name: notify_socket,
+		Name: notifySocket,
 	})
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func create_socket_ucred(notify_socket string) (*net.UnixConn, error) {
 		return nil, err
 	}
 
-	srvFile := os.NewFile(uintptr(fd), notify_socket+"_gofile")
+	srvFile := os.NewFile(uintptr(fd), notifySocket+"_gofile")
 	defer srvFile.Close()
 
 	srv, err := net.FileConn(srvFile)
@@ -107,10 +107,10 @@ func create_socket_ucred(notify_socket string) (*net.UnixConn, error) {
 		return nil, err
 	}
 
-	dgram_srv, ok := srv.(*net.UnixConn)
+	dgramSrv, ok := srv.(*net.UnixConn)
 	if !ok {
-		return nil, errors.New("can't cast dgram_srv")
+		return nil, errors.New("can't cast dgramSrv")
 	}
 
-	return dgram_srv, nil
+	return dgramSrv, nil
 }
