@@ -1,19 +1,20 @@
 // +build none
 
-package	main
+package main
 
-import	(
-	"net"
+import (
 	"fmt"
 	"io"
-	sd	"github.com/nathanaelle/sdialog"
+	"net"
+
+	sd "github.com/nathanaelle/sdialog/v2"
 )
 
 // no code here
 // just stubb from activation_echo
 
-func main(){
-	if err := sd.SD_INFO.Log("ok"); err != nil {
+func main() {
+	if err := sd.LogINFO.Log("ok"); err != nil {
 		panic(err)
 	}
 
@@ -21,16 +22,15 @@ func main(){
 	if len(ret) != 2 {
 		panic(fmt.Errorf("retreived %v sockets !!", len(ret)))
 	}
-	reader	:= netconnify(ret[0])
-	writer	:= netconnify(ret[1])
-	io.Copy(writer,reader)
+	reader := netconnify(ret[0])
+	writer := netconnify(ret[1])
+	io.Copy(writer, reader)
 }
-
 
 func netconnify(s sd.FileFD) net.Conn {
 	ret, ok := s.(net.Conn)
 	if !ok {
 		panic(fmt.Errorf("can't netconnify %+v", s))
 	}
-	return	ret
+	return ret
 }

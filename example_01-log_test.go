@@ -1,9 +1,9 @@
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
 func ExampleLog() {
-	init_testing_env_out()
+	initTestingEnvOut()
 
-	lvl := []LogLevel{SD_EMERG, SD_ALERT, SD_CRIT, SD_ERR, SD_WARNING, SD_NOTICE, SD_INFO, SD_DEBUG}
+	lvl := []LogLevel{LogEMERG, LogALERT, LogCRIT, LogERR, LogWARNING, LogNOTICE, LogINFO, LogDEBUG}
 
 	for i, sdLevel := range lvl {
 		Log(sdLevel, "hello")

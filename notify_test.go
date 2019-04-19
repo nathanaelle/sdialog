@@ -1,6 +1,6 @@
 // +build !linux
 
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
 import (
 	"bytes"
@@ -10,12 +10,12 @@ import (
 
 func Test_Notify_NoUcred(t *testing.T) {
 	t.Logf("init\n")
-	test_sequence := []State{Ready(), Reloading(), Stopping(), Status("hello"), MainPid(1337)}
+	testSequence := []State{Ready(), Reloading(), Stopping(), Status("hello"), MainPid(1337)}
 
-	init_testing_env()
+	initTestingEnv()
 
 	t.Logf("create fake server socket\n")
-	srv, err := create_socket()
+	srv, err := createSocket()
 	if err != nil {
 		t.Error(err)
 		return
@@ -24,10 +24,10 @@ func Test_Notify_NoUcred(t *testing.T) {
 
 	t.Logf("run loop\n")
 	go func() {
-		for _, s := range test_sequence {
-			switch	err := Notify(s); err {
-			case	nil:
-			case	NoSDialogAvailable:
+		for _, s := range testSequence {
+			switch err := Notify(s); err {
+			case nil:
+			case ErrNoSDialogAvailable:
 				t.Error("Env Test isn't detected !!")
 			default:
 				t.Errorf("Notify loop got : %v", err)
@@ -35,26 +35,26 @@ func Test_Notify_NoUcred(t *testing.T) {
 		}
 	}()
 
-	for i, s := range test_sequence {
+	for i, s := range testSequence {
 		t.Logf("wait state %d\n", i)
 		data := make([]byte, 1<<16)
 		oob := make([]byte, 1<<16)
-		s_data, s_oob, _, _, err := srv.ReadMsgUnix(data, oob)
+		dataSize, oobSize, _, _, err := srv.ReadMsgUnix(data, oob)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		data = data[:s_data]
-		oob = oob[:s_oob]
-		exp_data, exp_oob := s.State()
+		data = data[:dataSize]
+		oob = oob[:oobSize]
+		dataExp, oobExp := s.State()
 
-		if !bytes.Equal(data, exp_data) {
-			t.Errorf("data: expected [%v] got [%v]", exp_data, data)
+		if !bytes.Equal(data, dataExp) {
+			t.Errorf("data: expected [%v] got [%v]", dataExp, data)
 			return
 		}
 
-		if len(exp_oob) > s_oob {
-			t.Errorf("oob: expected [%v] got [%v]", len(exp_oob), s_oob)
+		if len(oobExp) != oobSize {
+			t.Errorf("oob: expected [%v] got [%v]", len(oobExp), oobSize)
 			return
 
 		}
@@ -63,13 +63,13 @@ func Test_Notify_NoUcred(t *testing.T) {
 }
 
 func Test_Notify_NoUcred_NoSD(t *testing.T) {
-	test_sequence := []State{Ready(), Reloading(), Stopping(), Status("hello"), MainPid(1337)}
-	init_testing_env_nosd()
+	testSequence := []State{Ready(), Reloading(), Stopping(), Status("hello"), MainPid(1337)}
+	initTestingEnvNosd()
 
-	for _, s := range test_sequence {
-		switch	err := Notify(s); err {
-		case	NoSDialogAvailable:
-		case	nil:
+	for _, s := range testSequence {
+		switch err := Notify(s); err {
+		case ErrNoSDialogAvailable:
+		case nil:
 			t.Error("Env Test NoSD isn't detected !!")
 		default:
 			t.Errorf("Notify loop got : %v", err)
@@ -77,12 +77,11 @@ func Test_Notify_NoUcred_NoSD(t *testing.T) {
 	}
 }
 
-
-func create_socket() (*net.UnixConn, error) {
-	notify_socket := ""
-	sdc_read(func(sdc sd_conf) error {
-		notify_socket = sdc.notify_socket
-		return	nil
+func createSocket() (*net.UnixConn, error) {
+	notifySocket := ""
+	sdcRead(func(sdc sdConf) error {
+		notifySocket = sdc.notifySocket
+		return nil
 	})
-	return net.DialUnix("unixgram", &net.UnixAddr{Name: notify_socket, Net: "unixgram"}, nil)
+	return net.DialUnix("unixgram", &net.UnixAddr{Name: notifySocket, Net: "unixgram"}, nil)
 }

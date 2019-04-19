@@ -1,37 +1,35 @@
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
 import (
 	"bytes"
-	"testing"
 	"errors"
+	"testing"
 )
 
-func TestLog(t *testing.T)  {
-	init_testing_env()
+func TestLog(t *testing.T) {
+	initTestingEnv()
 
-	t_err	:= errors.New("test error")
-	lvl := []LogLevel{SD_EMERG, SD_ALERT, SD_CRIT, SD_ERR, SD_WARNING, SD_NOTICE, SD_INFO, SD_DEBUG}
+	tmpErr := errors.New("test error")
+	lvl := []LogLevel{LogEMERG, LogALERT, LogCRIT, LogERR, LogWARNING, LogNOTICE, LogINFO, LogDEBUG}
 
-	for i, sd_level := range lvl {
-		Log(sd_level, "hello")
-		sd_level.Log("world")
-		Logf(sd_level, "foo %d", i+20)
-		sd_level.Logf("bar %d quux", i+30)
-		sd_level.LogError(t_err)
+	for i, sdLevel := range lvl {
+		Log(sdLevel, "hello")
+		sdLevel.Log("world")
+		Logf(sdLevel, "foo %d", i+20)
+		sdLevel.Logf("bar %d quux", i+30)
+		sdLevel.LogError(tmpErr)
 	}
 
-	inv_lvl := []LogLevel{ LogLevel('a'), LogLevel(0) }
-	for i, sd_level := range inv_lvl {
-		Log(sd_level, "hello")
-		sd_level.Log("world")
-		Logf(sd_level, "foo %d", i+20)
-		sd_level.Logf("bar %d quux", i+30)
-		sd_level.LogError(t_err)
+	invLvl := []LogLevel{LogLevel('a'), LogLevel(0)}
+	for i, sdLevel := range invLvl {
+		Log(sdLevel, "hello")
+		sdLevel.Log("world")
+		Logf(sdLevel, "foo %d", i+20)
+		sdLevel.Logf("bar %d quux", i+30)
+		sdLevel.LogError(tmpErr)
 	}
 
-
-
-	expected_out := `<0>hello
+	expectedOut := `<0>hello
 <0>world
 <0>foo 20
 <0>bar 30 quux
@@ -83,40 +81,38 @@ func TestLog(t *testing.T)  {
 <2>invalid LogLevel 0x00 for message test error
 `
 
-	sdc_read(func(sdc sd_conf) error {
-		test_out := sdc.logdest.(*bytes.Buffer).String()
-		if test_out != expected_out {
-			t.Log(test_out)
+	sdcRead(func(sdc sdConf) error {
+		testOut := sdc.logdest.(*bytes.Buffer).String()
+		if testOut != expectedOut {
+			t.Log(testOut)
 			t.Error("got wrong output")
 		}
-		return	nil
+		return nil
 	})
 }
 
+func TestLog_NoSD(t *testing.T) {
+	initTestingEnvNosd()
 
+	tmpErr := errors.New("test error")
+	lvl := []LogLevel{LogEMERG, LogALERT, LogCRIT, LogERR, LogWARNING, LogNOTICE, LogINFO, LogDEBUG}
 
-func TestLog_NoSD(t *testing.T)  {
-	init_testing_env_nosd()
-
-	t_err	:= errors.New("test error")
-	lvl := []LogLevel{SD_EMERG, SD_ALERT, SD_CRIT, SD_ERR, SD_WARNING, SD_NOTICE, SD_INFO, SD_DEBUG}
-
-	for i, sd_level := range lvl {
-		Log(sd_level, "hello")
-		sd_level.Log("world")
-		Logf(sd_level, "foo %d", i+20)
-		sd_level.Logf("bar %d quux", i+30)
-		sd_level.LogError(t_err)
+	for i, sdLevel := range lvl {
+		Log(sdLevel, "hello")
+		sdLevel.Log("world")
+		Logf(sdLevel, "foo %d", i+20)
+		sdLevel.Logf("bar %d quux", i+30)
+		sdLevel.LogError(tmpErr)
 	}
 
-	expected_out := ``
+	expectedOut := ``
 
-	sdc_read(func(sdc sd_conf) error {
-		test_out := sdc.logdest.(*bytes.Buffer).String()
-		if test_out != expected_out {
-			t.Log(test_out)
+	sdcRead(func(sdc sdConf) error {
+		testOut := sdc.logdest.(*bytes.Buffer).String()
+		if testOut != expectedOut {
+			t.Log(testOut)
 			t.Error("got wrong output")
 		}
-		return	nil
+		return nil
 	})
 }

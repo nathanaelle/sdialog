@@ -1,45 +1,45 @@
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
 import (
+	"bytes"
 	"os"
 	"path"
 	"sync"
-	"time"
-	"bytes"
 	"sync/atomic"
+	"time"
 )
 
-var lock	sync.Locker	= &sync.Mutex{}
+var lock sync.Locker = &sync.Mutex{}
 
-func init_testing_env() {
-	atomic.StoreInt32(&atomic_no_sd_available, 0)
-	sdc_write(func(sdc *sd_conf) error {
+func initTestingEnv() {
+	atomic.StoreInt32(&atomicNoSdAvailable, 0)
+	sdcWrite(func(sdc *sdConf) error {
 		sdc.logdest = new(bytes.Buffer)
-		sdc.notify_socket = "@sdialog_test_notify_socket" + time.Now().Format("2006-01-02T15-04-05.999999999")
-		sdc.notify_local_socket = "@" + path.Base(os.Args[0]) + "_" + time.Now().Format("15-04-05.999999999")
+		sdc.notifySocket = "@sdialog_test_notify_socket" + time.Now().Format("2006-01-02T15-04-05.999999999")
+		sdc.notifyLocalSocket = "@" + path.Base(os.Args[0]) + "_" + time.Now().Format("15-04-05.999999999")
 
-		return	nil
+		return nil
 	})
 }
 
-func init_testing_env_out() {
-	atomic.StoreInt32(&atomic_no_sd_available, 0)
-	sdc_write(func(sdc *sd_conf) error {
+func initTestingEnvOut() {
+	atomic.StoreInt32(&atomicNoSdAvailable, 0)
+	sdcWrite(func(sdc *sdConf) error {
 		sdc.logdest = os.Stdout
-		sdc.notify_socket = "@sdialog_test_notify_socket" + time.Now().Format("2006-01-02T15-04-05.999999999")
-		sdc.notify_local_socket = "@" + path.Base(os.Args[0]) + "_" + time.Now().Format("15-04-05.999999999")
+		sdc.notifySocket = "@sdialog_test_notify_socket" + time.Now().Format("2006-01-02T15-04-05.999999999")
+		sdc.notifyLocalSocket = "@" + path.Base(os.Args[0]) + "_" + time.Now().Format("15-04-05.999999999")
 
-		return	nil
+		return nil
 	})
 }
 
-func init_testing_env_nosd() {
-	atomic.StoreInt32(&atomic_no_sd_available, 1)
-	sdc_write(func(sdc *sd_conf) error {
+func initTestingEnvNosd() {
+	atomic.StoreInt32(&atomicNoSdAvailable, 1)
+	sdcWrite(func(sdc *sdConf) error {
 		sdc.logdest = new(bytes.Buffer)
-		sdc.notify_socket = ""
-		sdc.notify_local_socket = ""
+		sdc.notifySocket = ""
+		sdc.notifyLocalSocket = ""
 
-		return	nil
+		return nil
 	})
 }

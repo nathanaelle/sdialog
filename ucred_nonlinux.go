@@ -1,10 +1,8 @@
 // +build freebsd netbsd openbsd dragonfly darwin
 
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
-
-
-type	(
+type (
 	uCred struct {
 		Pid int32
 		Uid uint32
@@ -12,8 +10,7 @@ type	(
 	}
 )
 
-
 func unixCredentials(ucred *uCred) []byte {
-	SD_WARNING.Log("unixCredentials() syscall not implemented in golang")
+	LogWARNING.Log("unixCredentials() syscall not implemented in golang")
 	return []byte{}
 }

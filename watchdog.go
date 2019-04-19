@@ -1,60 +1,57 @@
-package	sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
-
-import	(
+import (
+	"context"
 	"sync"
 	"time"
-	"context"
 )
 
 var (
-	watchdog_state		= &simple_state{ []byte("WATCHDOG=1\n") }
+	watchdogState = &simpleState{[]byte("WATCHDOG=1\n")}
 )
 
-
-func Watchdog(end context.Context, wg *sync.WaitGroup)	error {
-	if no_sd_available() {
-		return	NoSDialogAvailable
+// Watchdog run a systemd compatible watchdog
+func Watchdog(end context.Context, wg *sync.WaitGroup) error {
+	if noSdAvailable() {
+		return ErrNoSDialogAvailable
 	}
 
-	return	sdc_write(func(sdc *sd_conf) error {
-		if sdc.watchdog_usec < 1 {
-			return	NoWatchdogNeeded
+	return sdcWrite(func(sdc *sdConf) error {
+		if sdc.watchdogUsec < 1 {
+			return ErrNoWatchdogNeeded
 		}
 
-		if sdc.watchdog_running {
-			return	nil
+		if sdc.watchdogRunning {
+			return nil
 		}
 
 		// see http://www.freedesktop.org/software/systemd/man/sd_watchdog_enabled.html
-		ticker	:= time.Tick(time.Duration(sdc.watchdog_usec/2) * time.Microsecond)
-		sdc.watchdog_running = true
+		ticker := time.Tick(time.Duration(sdc.watchdogUsec/2) * time.Microsecond)
+		sdc.watchdogRunning = true
 
 		if end == nil {
-			go watchdog_without_end(ticker, wg)
-			return	nil
+			go watchdogWithoutEnd(ticker, wg)
+			return nil
 		}
 
-		go watchdog_with_end(ticker, end, wg)
+		go watchdogWithEnd(end, ticker, wg)
 
-		return	nil
+		return nil
 	})
 }
 
-
-func watchdog_without_end(ticker <-chan time.Time, wg *sync.WaitGroup){
+func watchdogWithoutEnd(ticker <-chan time.Time, wg *sync.WaitGroup) {
 	if wg != nil {
 		wg.Add(1)
 		defer wg.Done()
 	}
 
 	for range ticker {
-		Notify(watchdog_state)
+		Notify(watchdogState)
 	}
 }
 
-
-func watchdog_with_end(ticker <-chan time.Time, end context.Context, wg *sync.WaitGroup){
+func watchdogWithEnd(end context.Context, ticker <-chan time.Time, wg *sync.WaitGroup) {
 	if wg != nil {
 		wg.Add(1)
 		defer wg.Done()
@@ -62,9 +59,9 @@ func watchdog_with_end(ticker <-chan time.Time, end context.Context, wg *sync.Wa
 
 	for {
 		select {
-		case	<-ticker:
-			Notify(watchdog_state)
-		case	<-end.Done():
+		case <-ticker:
+			Notify(watchdogState)
+		case <-end.Done():
 			return
 		}
 	}

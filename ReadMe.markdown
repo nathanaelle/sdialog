@@ -1,6 +1,7 @@
 # sdialog
 
-![License](http://img.shields.io/badge/license-Simplified_BSD-blue.svg?style=flat) [![Go Doc](http://img.shields.io/badge/godoc-sdialog-blue.svg?style=flat)](http://godoc.org/github.com/nathanaelle/sdialog) [![Build Status](https://travis-ci.org/nathanaelle/sdialog.svg?branch=master)](https://travis-ci.org/nathanaelle/sdialog)
+![License](http://img.shields.io/badge/license-Simplified_BSD-blue.svg?style=flat) [![Go Doc](http://img.shields.io/badge/godoc-sdialog-blue.svg?style=flat)](http://godoc.org/github.com/nathanaelle/sdialog) [![Build Status](https://travis-ci.org/nathanaelle/sdialog.svg?branch=master)](https://travis-ci.org/nathanaelle/sdialog) [![Go Report Card](https://goreportcard.com/badge/github.com/nathanaelle/sdialog)](https://goreportcard.com/report/github.com/nathanaelle/sdialog)
+
 
 ## Supported & tested Systemd API
 

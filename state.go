@@ -1,61 +1,56 @@
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
-import	(
-	"fmt"
+import (
 	"bytes"
+	"fmt"
 )
 
-
-type	(
-	State		interface {
-		State()	(msg,oob []byte)
+type (
+	// State describe a systemd compatible state
+	State interface {
+		State() (msg, oob []byte)
 		String() string
 	}
 
-	simple_state	struct {
-		dumbvar	[]byte
+	simpleState struct {
+		dumbvar []byte
 	}
 
-	msg_state	struct {
-		state	string
+	msgState struct {
+		state   string
 		message string
 	}
 )
 
-
-func valid_state(s State) bool {
-	m,_	:= s.State()
-	l 	:= len(m)
+func validState(s State) bool {
+	m, _ := s.State()
+	l := len(m)
 
 	if m[l-1] != '\n' {
-		return	false
+		return false
 	}
 
-	if bytes.IndexByte( m[1:l-2], '=' ) < 0 {
-		return	false
+	if bytes.IndexByte(m[1:l-2], '=') < 0 {
+		return false
 	}
 
-	return	true
+	return true
 }
 
-
-
-func (s *simple_state)State() (msg,oob []byte) {
-	msg	= []byte(s.dumbvar[:])
+func (s *simpleState) State() (msg, oob []byte) {
+	msg = []byte(s.dumbvar[:])
 	return
 }
 
-
-func (s *simple_state)String() string {
-	return string(s.dumbvar[0:len(s.dumbvar)-1])
+func (s *simpleState) String() string {
+	return string(s.dumbvar[0 : len(s.dumbvar)-1])
 }
 
-
-func (ms *msg_state)State() (msg,oob []byte) {
+func (ms *msgState) State() (msg, oob []byte) {
 	s := []byte(ms.state)
 	m := []byte(ms.message)
 
-	msg = make([]byte,0,len(s)+len(m)+2)
+	msg = make([]byte, 0, len(s)+len(m)+2)
 	msg = append(msg, s...)
 	msg = append(msg, '=')
 	msg = append(msg, m...)
@@ -64,38 +59,42 @@ func (ms *msg_state)State() (msg,oob []byte) {
 	return
 }
 
-
-func (s *msg_state)String() string {
-	r,_ := s.State()
-	return string(r[0:len(r)-1])
+func (ms *msgState) String() string {
+	r, _ := ms.State()
+	return string(r[0 : len(r)-1])
 }
 
-
-
+// Ready describe the state READY for systemd supervisor
 func Ready() State {
-	return	&simple_state{ []byte("READY=1\n") }
+	return &simpleState{[]byte("READY=1\n")}
 }
 
+// Reloading describe the state RELOADING for systemd supervisor
 func Reloading() State {
-	return	&simple_state{ []byte("RELOADING=1\n") }
+	return &simpleState{[]byte("RELOADING=1\n")}
 }
 
+// Stopping describe the state STOPPING for systemd supervisor
 func Stopping() State {
-	return	&simple_state{ []byte("STOPPING=1\n") }
+	return &simpleState{[]byte("STOPPING=1\n")}
 }
 
+// Status describe the state STATUS for systemd supervisor
 func Status(status string) State {
-	return	&msg_state { "STATUS", status }
+	return &msgState{"STATUS", status}
 }
 
+// BusError describe the state BUSSERROR for systemd supervisor
 func BusError(status string) State {
-	return	&msg_state { "BUSERROR", status }
+	return &msgState{"BUSERROR", status}
 }
 
+// MainPid describe the state MAINPID for systemd supervisor
 func MainPid(pid int) State {
-	return	&msg_state { "MAINPID", fmt.Sprintf("%d", pid) }
+	return &msgState{"MAINPID", fmt.Sprintf("%d", pid)}
 }
 
+// Errno describe the state ERRNO for systemd supervisor
 func Errno(errno int) State {
-	return	&msg_state { "ERRNO", fmt.Sprintf("%d", errno) }
+	return &msgState{"ERRNO", fmt.Sprintf("%d", errno)}
 }

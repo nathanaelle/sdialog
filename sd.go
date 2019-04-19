@@ -1,124 +1,120 @@
-package	sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
-import	(
-	"io"
-	"os"
+import (
 	"fmt"
+	"io"
 	"net"
+	"os"
 	"path"
-	"sync"
-	"time"
 	"strconv"
+	"sync"
 	"sync/atomic"
+	"time"
 )
 
-type	(
-	sd_conf	struct {
-		lock			sync.Locker
+type (
+	sdConf struct {
+		lock sync.Locker
 
-		notifyConn		*net.UnixConn
-		notify_socket		string
-		notify_local_socket	string
+		notifyConn        *net.UnixConn
+		notifySocket      string
+		notifyLocalSocket string
 
-		logdest			io.Writer
+		logdest io.Writer
 
-		watchdog_usec		int
-		watchdog_running	bool
+		watchdogUsec    int
+		watchdogRunning bool
 
-		l_pid	int
-		n_fds	int
+		listenPid int
+		fdsLen    int
 	}
 )
 
+var (
+	atomicNoSdAvailable int32
 
-var	(
-	atomic_no_sd_available	int32	= 0
-
-	sdc	*sd_conf = sdc_init()
+	sdc = sdcInit()
 )
 
-
-func no_sd_available() bool {
-	return	atomic.LoadInt32(&atomic_no_sd_available) == 1
+func noSdAvailable() bool {
+	return atomic.LoadInt32(&atomicNoSdAvailable) == 1
 }
 
 func init() {
-	var err	error
+	var err error
 
-	notify_socket := os.Getenv("NOTIFY_SOCKET")
+	notifySocket := os.Getenv("NOTIFY_SOCKET")
 	os.Unsetenv("NOTIFY_SOCKET")
-	if notify_socket == "" {
-		atomic.StoreInt32(&atomic_no_sd_available, 1)
+	if notifySocket == "" {
+		atomic.StoreInt32(&atomicNoSdAvailable, 1)
 		return
 	}
 
-	sdc_write(func(sdc *sd_conf) error {
-		sdc.notify_socket = notify_socket
-		sdc.notify_local_socket = "@_"+path.Base(os.Args[0])+"_"+time.Now().Format("15-04-05.999999999")
+	sdcWrite(func(sdc *sdConf) error {
+		sdc.notifySocket = notifySocket
+		sdc.notifyLocalSocket = "@_" + path.Base(os.Args[0]) + "_" + time.Now().Format("15-04-05.999999999")
 
-
-		s_wdu	:= os.Getenv("WATCHDOG_USEC")
-		s_pid	:= os.Getenv("LISTEN_PID")
-		s_fds	:= os.Getenv("LISTEN_FDS")
+		wduStr := os.Getenv("WATCHDOG_USEC")
+		pidStr := os.Getenv("LISTEN_PID")
+		fdsStr := os.Getenv("LISTEN_FDS")
 
 		os.Unsetenv("LISTEN_PID")
 		os.Unsetenv("LISTEN_FDS")
 		os.Unsetenv("WATCHDOG_USEC")
 
-		if s_wdu != "" {
-			sdc.watchdog_usec, err = strconv.Atoi(s_wdu)
+		if wduStr != "" {
+			sdc.watchdogUsec, err = strconv.Atoi(wduStr)
 			if err != nil {
-				SD_CRIT.Log(fmt.Sprintf("WATCHDOG_USEC Error: %s", err.Error()))
+				LogCRIT.Log(fmt.Sprintf("WATCHDOG_USEC Error: %s", err.Error()))
 			}
 		}
 
-		if s_pid != "" {
-			sdc.l_pid,err = strconv.Atoi(s_pid)
-			if  err != nil {
-				sdc.l_pid = 0
-				SD_CRIT.Logf("LISTEN_PID : %v", err)
+		if pidStr != "" {
+			sdc.listenPid, err = strconv.Atoi(pidStr)
+			if err != nil {
+				sdc.listenPid = 0
+				LogCRIT.Logf("LISTEN_PID : %v", err)
 			}
 		}
 
-		if s_fds != "" {
-			sdc.n_fds,err = strconv.Atoi(s_fds)
-			if  err != nil {
-				sdc.n_fds = 0
-				SD_CRIT.Logf("LISTEN_FDS : %v", err)
+		if fdsStr != "" {
+			sdc.fdsLen, err = strconv.Atoi(fdsStr)
+			if err != nil {
+				sdc.fdsLen = 0
+				LogCRIT.Logf("LISTEN_FDS : %v", err)
 			}
-			sdc.n_fds	+= sd_fds_start
+			sdc.fdsLen += fdsStart
 		}
-		return	nil
+		return nil
 	})
 }
 
-func is_mainpid() bool {
-	l_pid	:= 0
-	sdc_read(func(sdc sd_conf) error {
-		l_pid = sdc.l_pid
-		return	nil
+func isMainpid() bool {
+	listenPid := 0
+	sdcRead(func(sdc sdConf) error {
+		listenPid = sdc.listenPid
+		return nil
 	})
-	return	(l_pid==0) || (os.Getpid() != l_pid)
+	return (listenPid == 0) || (os.Getpid() != listenPid)
 }
 
-
-func sdc_init() *sd_conf  {
-	return	&sd_conf {
-		lock:		&sync.Mutex{},
-		logdest:	os.Stderr,
+func sdcInit() *sdConf {
+	return &sdConf{
+		lock:    &sync.Mutex{},
+		logdest: os.Stderr,
 	}
 }
 
-func sdc_read(f func(sd_conf)error)error {
+func sdcRead(f func(sdConf) error) error {
 	sdc.lock.Lock()
-	defer	sdc.lock.Unlock()
+	defer sdc.lock.Unlock()
 
 	return f(*sdc)
 }
 
-func sdc_write(f func(*sd_conf)error)error {
+func sdcWrite(f func(*sdConf) error) error {
 	sdc.lock.Lock()
-	defer	sdc.lock.Unlock()
+	defer sdc.lock.Unlock()
 
 	return f(sdc)
 }

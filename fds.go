@@ -1,35 +1,34 @@
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
-import	(
-	"os"
+import (
 	"fmt"
+	"os"
 	"strings"
 	"syscall"
 )
 
-type	(
-	FileFD	interface {
-		File() (*os.File,error)
+type (
+	// FileFD is the minimal common part between all go file descriptor
+	FileFD interface {
+		File() (*os.File, error)
 		Close() error
 	}
 
-	fds	struct {
-		name	string
-		fds	[]int
+	fds struct {
+		name string
+		fds  []int
 	}
 )
 
-const	sd_fds_start	int	= 3
+const fdsStart int = 3
 
-
-func (sd *fds)String() string {
+func (sd *fds) String() string {
 	return fmt.Sprintf("[%s] = %d fds", sd.name, len(sd.fds))
 }
 
-
-func (sd *fds)State() (msg,oob []byte) {
-	oob	= syscall.UnixRights(sd.fds...)
-	msg	= []byte("FDSTORE=1\n")
+func (sd *fds) State() (msg, oob []byte) {
+	oob = syscall.UnixRights(sd.fds...)
+	msg = []byte("FDSTORE=1\n")
 
 	if sd.name != "" {
 		msg = append(msg, []byte("FDNAME=")...)
@@ -40,64 +39,62 @@ func (sd *fds)State() (msg,oob []byte) {
 	return
 }
 
-
-func valid_fdname(name string) bool {
-	for _,r := range name {
+func validFdName(name string) bool {
+	for _, r := range name {
 		switch {
-		case	r == ':':
-			return	false
+		case r == ':':
+			return false
 
-		case	r >= 127:
-			return	false
+		case r >= 127:
+			return false
 
-		case	r < ' ':
-			return	false
+		case r < ' ':
+			return false
 		}
 	}
-	return	true
+	return true
 }
 
-
-
+// FDStore ask to systemd like supervisor to store an FileFD
 func FDStore(name string, ifaces ...FileFD) State {
-	if !valid_fdname(name) {
-		SD_CRIT.Logf( "%v", &invalidFDNameError { name } )
-		return	nil
+	if !validFdName(name) {
+		LogCRIT.Logf("%v", &invalidFDNameError{name})
+		return nil
 	}
 
-	s := &fds {
+	s := &fds{
 		name: name,
 	}
 
-	for id,listener := range ifaces {
-		fd,err := listener.File()
-		if  err != nil {
-			SD_CRIT.Logf("socket %v : %v", id, err)
+	for id, listener := range ifaces {
+		fd, err := listener.File()
+		if err != nil {
+			LogCRIT.Logf("socket %v : %v", id, err)
 			continue
 		}
 		s.fds = append(s.fds, int(fd.Fd()))
 	}
 
-	return	s
+	return s
 }
 
-
+// FDRetrieve ask to systemd like supervisor to retrieve an FileFD
 func FDRetrieve(mapper MapFD) (ret []FileFD) {
-	if no_sd_available() {
+	if noSdAvailable() {
 		return
 	}
 
-	if !is_mainpid() {
+	if !isMainpid() {
 		return
 	}
 
-	n_fds := 0
-	sdc_read(func(sdc sd_conf) error {
-		n_fds = sdc.n_fds
-		return	nil
+	fdsLen := 0
+	sdcRead(func(sdc sdConf) error {
+		fdsLen = sdc.fdsLen
+		return nil
 	})
 
-	if n_fds <= sd_fds_start {
+	if fdsLen <= fdsStart {
 		return
 	}
 
@@ -105,11 +102,11 @@ func FDRetrieve(mapper MapFD) (ret []FileFD) {
 		mapper = &fd2netConnListener{}
 	}
 
-	for fd	:= sd_fds_start ; fd < n_fds ; fd++ {
+	for fd := fdsStart; fd < fdsLen; fd++ {
 		syscall.CloseOnExec(fd)
-		l, err	:= mapper.FDMapper(fd)
-		if err	!= nil {
-			SD_ALERT.Logf("FDs %d : %v", fd, err)
+		l, err := mapper.FDMapper(fd)
+		if err != nil {
+			LogALERT.Logf("FDs %d : %v", fd, err)
 			continue
 		}
 		ret = append(ret, l)
@@ -117,37 +114,37 @@ func FDRetrieve(mapper MapFD) (ret []FileFD) {
 	return
 }
 
-
+// FDRetrieveByName ask to systemd like supervisor to retrieve an named FileFD
 func FDRetrieveByName(mapper MapFD) (ret map[string][]FileFD) {
-	lili	:= FDRetrieve(mapper)
+	lili := FDRetrieve(mapper)
 	if len(lili) == 0 {
 		return
 	}
 
-	ret	=  make(map[string][]FileFD)
-	l_fdn	:= strings.Split(os.Getenv("LISTEN_FDNAMES"), ":")
-	if len(l_fdn) == 0 {
+	ret = make(map[string][]FileFD)
+	fdnList := strings.Split(os.Getenv("LISTEN_FDNAMES"), ":")
+	if len(fdnList) == 0 {
 		ret["unknown"] = lili
 		return
 	}
 
-	if len(l_fdn) != len(lili) {
-		SD_ALERT.Logf("FD %v : %v", len(l_fdn), len(lili))
+	if len(fdnList) != len(lili) {
+		LogALERT.Logf("FD %v : %v", len(fdnList), len(lili))
 		return
 	}
 
-	for i,_ := range l_fdn {
-		name := l_fdn[i]
-		if !valid_fdname(name) {
+	for i := range fdnList {
+		name := fdnList[i]
+		if !validFdName(name) {
 			name = "unknown"
 		}
 		if name == "" {
 			name = "unknown"
 		}
-		switch _,ok := ret[name]; ok {
-		case	false:
-			ret[name] = []FileFD { lili[i] }
-		case	true:
+		switch _, ok := ret[name]; ok {
+		case false:
+			ret[name] = []FileFD{lili[i]}
+		case true:
 			ret[name] = append(ret[name], lili[i])
 		}
 	}

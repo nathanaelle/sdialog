@@ -1,10 +1,9 @@
 language: go
 go:
-- 1.7
-- 1.8
+- 1.12
 - tip
 branches:
   only:
   - master
 install:
-- go get github.com/nathanaelle/sdialog
+- go get github.com/nathanaelle/sdialog/v2
