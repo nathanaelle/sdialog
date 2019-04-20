@@ -1,6 +1,6 @@
 // +build freebsd netbsd openbsd dragonfly darwin
 
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog // import "github.com/nathanaelle/sdialog/v2"
 
 type (
 	uCred struct {

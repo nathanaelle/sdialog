@@ -1,10 +1,9 @@
 language: go
 go:
-- tip
 - 1.12
 branches:
   except:
   - /poc-.*/
   - experimental
+go_import_path: github.com/nathanaelle/sdialog/v2
 script: go test -v
-
