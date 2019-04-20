@@ -6,3 +6,5 @@ branches:
   except:
   - /poc-.*/
   - experimental
+script: go test -v
+

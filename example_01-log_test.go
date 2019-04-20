@@ -1,4 +1,4 @@
-package sdialog // import "github.com/nathanaelle/sdialog"
+package sdialog
 
 func ExampleLog() {
 	initTestingEnvOut()
