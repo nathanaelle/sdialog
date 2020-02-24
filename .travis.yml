@@ -1,6 +1,8 @@
 language: go
 go:
-- 1.12
+  - tip
+  - 1.13
+  - 1.12
 branches:
   except:
   - /poc-.*/
