@@ -1,5 +1,8 @@
 /*
-Package sdialog offer a golang way interface to communicate with systemd
+
+systemd API for go.
+
+sdialog offer a golang way interface to communicate with systemd.
 
 the simpliest way to use sdialog is :
 
